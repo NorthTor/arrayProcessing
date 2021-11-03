@@ -63,8 +63,8 @@ x = data["x_synthetic"] # time domain measurements
 r = data["r"] # Get the array sensor possition vector 
 
 # Set parameters for sub array dimensions
-N1 = 14 # first dimension
-N2 = 14 # second dimension
+N1 = 10 # first dimension
+N2 = 10 # second dimension
 N3 = 101 # amount of samples used (max 101)
 
 # Get the sub arrays, data and position
@@ -93,6 +93,7 @@ M = len(theta_search)
 
 Lf = N3 
 Lf_array = np.arange(Lf)
+
 delta_f = 2e6 # frequency spacing in measurements = 2MHz
 
 
