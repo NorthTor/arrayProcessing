@@ -4,8 +4,7 @@ from scipy.io import loadmat
 from numpy import linalg
 import matplotlib.pyplot as plt
 
-from tempfile import TemporaryFile
-outfile = TemporaryFile()
+
 # get new sub array from master position array 
 # L = N_1 x N_2
 
