@@ -65,7 +65,7 @@ r = data["r"] # Get the array sensor possition vector
 # Set parameters for sub array dimensions
 N1 = 6 # first dimension
 N2 = 6  # second dimension
-N3 = 50 # amount of samples used (max 101)
+N3 = 101 # amount of samples used (max 101)
 
 # Get the sub arrays, data and position
 r_array = get_sub_array_position(N1, N2, r)
@@ -84,7 +84,7 @@ print('Shape Rxx:', np.shape(R_xx))
 
 # Set up search angles and delays for barlett implementation
 theta_search = np.arange(start=0, stop=2*np.pi, step=00.1)
-tau_search = np.arange(start=0.5e-8, stop=6e-8, step=0.2e-8) 
+tau_search = np.arange(start=0.5e-8, stop=15e-8, step=0.2e-8) 
 
 Q = len(tau_search)
 M = len(theta_search)
@@ -94,10 +94,10 @@ c = 300e6
 lamb = c/f_carrier # should be the same unit as r
 
 delta_f = 2e6   # frequency spacing in measurements = 2MHz
-f_lower = 7.4e9 # lower frequency in signal 
+f_0 = 7.4e9 # lower frequency in signal 
 
-fl_array = np.arange(N3) * delta_f + f_lower
-print(fl_array)
+array = np.arange(N3)
+fl = array * delta_f + f_0
 
 a = np.zeros((M,N1*N2), dtype=complex)
 
@@ -108,11 +108,11 @@ for m in range(M):
 
 	# compute a vector
 	a = np.exp(1j * ((2 * np.pi) / lamb) * (np.array([np.cos(theta_search[m]), np.sin(theta_search[m])]) @ r_array))
-	#print("Shape a:", np.shape(a))
+	# print("Shape a:", np.shape(a))
 
 	for q in range(Q):
 		# compute the b matrix
-		b = np.exp(-1j * 2 * np.pi * fl_array * tau_search[q])
+		b = np.exp(-1j * 2 * np.pi * fl * tau_search[q])
 		# print("Shape b:", np.shape(b))
 		# print("Shape u:", np.shape(u))
 		u = np.kron(b, a)
