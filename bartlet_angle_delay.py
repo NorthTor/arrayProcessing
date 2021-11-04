@@ -63,9 +63,9 @@ x = data["x_synthetic"] # time domain measurements
 r = data["r"] # Get the array sensor possition vector 
 
 # Set parameters for sub array dimensions
-N1 = 6 # first dimension
-N2 = 6  # second dimension
-N3 = 101 # amount of samples used (max 101)
+N1 = 40 # first dimension
+N2 = 40  # second dimension
+N3 = 1 # amount of samples used (max 101)
 
 # Get the sub arrays, data and position
 r_array = get_sub_array_position(N1, N2, r)
@@ -83,8 +83,8 @@ print('Shape Rxx:', np.shape(R_xx))
 
 
 # Set up search angles and delays for barlett implementation
-theta_search = np.arange(start=0, stop=2*np.pi, step=00.1)
-tau_search = np.arange(start=0.5e-8, stop=15e-8, step=0.2e-8) 
+theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
+tau_search = np.arange(start=0.5e-8, stop=10e-8, step=0.1e-8) 
 
 Q = len(tau_search)
 M = len(theta_search)
@@ -127,6 +127,8 @@ for m in range(M):
 
 
 Power = abs(P_bartlet)
+plt.imshow(Power, cmap='viridis', interpolation='nearest')
+plt.show()
 
 x = theta_search * (180/np.pi)
 y = tau_search
@@ -144,4 +146,8 @@ ax.set_ylabel('Delay tau (phase)')
 ax.set_zlabel('Magnitude Power')
 
 plt.show()
-
+"""
+Power = abs(P_bartlet)
+plt.imshow(Power, cmap='viridis', interpolation='nearest')
+plt.show()
+"""
