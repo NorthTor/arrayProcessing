@@ -71,8 +71,8 @@ x = data["x_synthetic"] # time domain measurements
 r = data["r"] # Get the array sensor possition vector 
 
 # Set parameters for sub array dimensions
-N1 = 9  # first dimension
-N2 = 9  # second dimension
+N1 = 6 # first dimension
+N2 = 6 # second dimension
 N3 = 101 # amount of samples used (max 101)
 SNR = 10
 
@@ -99,7 +99,7 @@ c = 300e6
 lamb = c/f_carrier # should be the same unit as r
 
 # Set up search angles for barlett implementation
-theta_search = np.arange(start=-np.pi, stop=np.pi, step=0.1)
+theta_search = np.arange(start=-3*np.pi/2, stop=np.pi, step=0.1)
 tau_search = np.arange(start=1e-8, stop=4e-8, step=0.1e-8) # need better search field # OBS
 
 Q = len(tau_search)
@@ -132,10 +132,10 @@ for m in range(M):
 		#print('shape u:', np.shape(u))
 		#print(np.shape(data))
 		
-		P_capon[m,q] = (u.conj().T @ R_xx_inv @ u)
+		P_bartlet[m,q] = (u.conj().T @ R_xx_inv @ u)
 
 
-Power = abs(P_capon)
+Power = abs(P_bartlet)
 
 x = theta_search * (180/np.pi)
 y = tau_search
