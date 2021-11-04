@@ -63,9 +63,9 @@ x = data["x_synthetic"] # time domain measurements
 r = data["r"] # Get the array sensor possition vector 
 
 # Set parameters for sub array dimensions
-N1 = 10 # first dimension
-N2 = 10  # second dimension
-N3 = 101 # amount of samples used (max 101)
+N1 = 6 # first dimension
+N2 = 6  # second dimension
+N3 = 50 # amount of samples used (max 101)
 
 # Get the sub arrays, data and position
 r_array = get_sub_array_position(N1, N2, r)
@@ -78,13 +78,13 @@ X = X.T
 print('Shape X:', np.shape(X))
 
 # Barlett implementation without delay
-R_xx = (X @ X.conj().T) / N3 
+R_xx = (X @ X.conj().T) / (N1 * N2) 
 print('Shape Rxx:', np.shape(R_xx))
 
 
 # Set up search angles and delays for barlett implementation
-theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
-tau_search = np.arange(start=0.5e-8, stop=5e-8, step=0.1e-8) 
+theta_search = np.arange(start=0, stop=2*np.pi, step=00.1)
+tau_search = np.arange(start=0.5e-8, stop=6e-8, step=0.2e-8) 
 
 Q = len(tau_search)
 M = len(theta_search)
@@ -96,7 +96,7 @@ lamb = c/f_carrier # should be the same unit as r
 delta_f = 2e6   # frequency spacing in measurements = 2MHz
 f_lower = 7.4e9 # lower frequency in signal 
 
-fl_array = (np.arange(N3) * delta_f) + f_lower
+fl_array = np.arange(N3) * delta_f + f_lower
 print(fl_array)
 
 a = np.zeros((M,N1*N2), dtype=complex)
@@ -122,11 +122,8 @@ for m in range(M):
 		numerator = u.conj().T @ R_xx @ u
 		denominator = u.conj().T @ u
 
-		data = numerator / denominator
-		
+		P_bartlet[m,q] = numerator / denominator	
 		#print(np.shape(data))
-		
-		P_bartlet[m,q] = data
 
 
 Power = abs(P_bartlet)
@@ -137,7 +134,7 @@ y = tau_search
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
 
-X, Y = np.meshgrid(x, y)  
+X,Y = np.meshgrid(x, y)  
 
 ax.plot_surface(X.T, Y.T, Power, rstride=1, cstride=1,
                 cmap='viridis', edgecolor='none') 
