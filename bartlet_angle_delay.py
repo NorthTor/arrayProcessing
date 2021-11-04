@@ -1,8 +1,9 @@
-
 import numpy as np
 from scipy.io import loadmat
 from numpy import linalg
 import matplotlib.pyplot as plt
+
+from numpy import linalg as LA
 
 
 # get new sub array from master position array 
@@ -62,64 +63,67 @@ x = data["x_synthetic"] # time domain measurements
 r = data["r"] # Get the array sensor possition vector 
 
 # Set parameters for sub array dimensions
-N1 = 9  # first dimension
-N2 = 9  # second dimension
+N1 = 10 # first dimension
+N2 = 10  # second dimension
 N3 = 101 # amount of samples used (max 101)
 
 # Get the sub arrays, data and position
 r_array = get_sub_array_position(N1, N2, r)
 X = get_sub_array_data(N1, N2, N3, X)
 
+# flatten data matrix column wise
 X = np.array([X.flatten('F')])
+# transpose to get a row vector
 X = X.T
-
 print('Shape X:', np.shape(X))
+
 # Barlett implementation without delay
 R_xx = (X @ X.conj().T) / N3 
 print('Shape Rxx:', np.shape(R_xx))
 
 
-f_carrier = 7.5e9 # 7.5 GHz
-c = 300e6 
-lamb = c/f_carrier # should be the same unit as r
-
-# Set up search angles for barlett implementation
-theta_search = np.arange(start=-np.pi, stop=np.pi, step=0.1)
-tau_search = np.arange(start=1e-8, stop=4e-8, step=0.1e-8) # need better search field # OBS
+# Set up search angles and delays for barlett implementation
+theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
+tau_search = np.arange(start=0.5e-8, stop=5e-8, step=0.1e-8) 
 
 Q = len(tau_search)
 M = len(theta_search)
 
-Lf = N3 
-Lf_array = np.arange(Lf)
+f_carrier = 7.5e9 # 7.5 GHz
+c = 300e6 
+lamb = c/f_carrier # should be the same unit as r
 
-delta_f = 2e6 # frequency spacing in measurements = 2MHz
+delta_f = 2e6   # frequency spacing in measurements = 2MHz
+f_lower = 7.4e9 # lower frequency in signal 
 
+fl_array = (np.arange(N3) * delta_f) + f_lower
+print(fl_array)
 
 a = np.zeros((M,N1*N2), dtype=complex)
 
-P_barlett = np.zeros((M,Q), dtype=complex)
+P_bartlet = np.zeros((M,Q), dtype=complex)
 
 for m in range(M):
 	print(m, 'of', M, 'angles')
 
 	# compute a vector
-	a = np.exp(1j * (2 * np.pi / lamb) * (np.array([np.cos(theta_search[m]), np.sin(theta_search[m])]) @ r_array))
+	a = np.exp(1j * ((2 * np.pi) / lamb) * (np.array([np.cos(theta_search[m]), np.sin(theta_search[m])]) @ r_array))
 	#print("Shape a:", np.shape(a))
 
 	for q in range(Q):
 		# compute the b matrix
-		b = np.exp(-1j * 2 * np.pi * Lf_array * tau_search[q] * delta_f)
+		b = np.exp(-1j * 2 * np.pi * fl_array * tau_search[q])
 		# print("Shape b:", np.shape(b))
 		# print("Shape u:", np.shape(u))
-		u = np.kron(a, b)
-
+		u = np.kron(b, a)
+		u = np.array([u]).T
 		#print('shape u:', np.shape(u))
 
 		numerator = u.conj().T @ R_xx @ u
 		denominator = u.conj().T @ u
 
 		data = numerator / denominator
+		
 		#print(np.shape(data))
 		
 		P_bartlet[m,q] = data
@@ -143,6 +147,4 @@ ax.set_ylabel('Delay tau (phase)')
 ax.set_zlabel('Magnitude Power')
 
 plt.show()
-
-
 
