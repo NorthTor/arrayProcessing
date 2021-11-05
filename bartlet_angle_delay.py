@@ -80,18 +80,16 @@ X = X.T
 print('Shape X:', np.shape(X))
 
 # Barlett implementation without delay
-R_xx = (X @ X.conj().T) / (N1 * N2) 
+R_xx = (X @ X.conj().T) # / (N1 * N2)
 print('Shape Rxx:', np.shape(R_xx))
 
 nbr_steps_tau = 50 
 # Set up search angles and delays for barlett implementation
-theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
+theta_search = np.arange(start=0, stop=2*np.pi, step=0.01)
 tau_search = np.linspace(start=1.6667e-7, stop=(1.6667e-7 + 30e-9), num= nbr_steps_tau) 
 
-tau_seconds = (np.arange(nbr_steps_tau) / nbr_steps_tau) * 35e-9
+tau_seconds = (np.arange(nbr_steps_tau) / nbr_steps_tau) * 30e-9 
 
-
-# Simon/karl = 
 Q = len(tau_search)
 M = len(theta_search)
 
@@ -129,9 +127,8 @@ for m in range(M):
 		numerator = u.conj().T @ R_xx @ u
 		denominator = u.conj().T @ u
 
-		P_bartlett[m,q] = numerator / denominator	
+		P_bartlett[m,q] = numerator / denominator
 		# print(np.shape(data))
-
 
 
 limits = 20 * np.log10(np.amax(abs(P_bartlett))) + np.array([-40,0])
@@ -140,7 +137,7 @@ Power = 20 * np.log10(abs(P_bartlett))
 rows, cols = np.shape(Power)
 
 Power_reduced = np.zeros((rows,cols))
-# replace values lower than -40 db in the spectrum
+# replace values lower than 40 db in the spectrum
 for i in range(rows):
 	for j in range(cols):
 		if Power[i,j] < 40:
@@ -159,13 +156,13 @@ ax = fig.add_subplot(projection='3d')
 
 X,Y = np.meshgrid(x, y)  
 
-ax.plot_surface(X.T, Y.T, Power_reduced, rstride=1, cstride=1,
+ax.plot_surface(X.T, Y.T, Power, rstride=1, cstride=1,
                 cmap='viridis', edgecolor='none') 
 
 ax.set_xlabel('Angles')
 ax.set_ylabel('Delay (seconds)')
 ax.set_zlabel('Power (db)')
-ax.set_zlim(limits[0], limits[1])
+# ax.set_zlim(limits[0], limits[1])
 ax.set_title('Bartlett spectrum')
 # fig.colorbar(surf, shrink=0.5, aspect=5)
 
