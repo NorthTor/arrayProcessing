@@ -222,7 +222,7 @@ plt.scatter(63.8, 1.9027e-8, s=60, c='red', marker='x', linewidths=1)
 plt.scatter(164.8, 3.1118e-8, s=60, c='red', marker='x', linewidths=1) 
 plt.scatter(273.7, 3.1175e-8, s=60, c='red', marker='x', linewidths=1)
 plt.xlabel(r'$\theta_{m}$ (degrees)') 
-plt.ylabel(r'$\tau_{n}$ (seconds)') 
+plt.ylabel(r'$\tau_{q}$ (seconds)') 
 
 plt.clim(np.amin(Power), np.amax(Power)) 
 cbar = plt.colorbar(fraction=0.046, pad=0.04)
