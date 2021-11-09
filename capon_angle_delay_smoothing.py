@@ -225,7 +225,7 @@ plt.xlabel(r'$\theta_{m}$ (degrees)')
 plt.ylabel(r'$\tau_{q}$ (seconds)') 
 
 plt.clim(np.amin(Power), np.amax(Power)) 
-cbar = plt.colorbar(fraction=0.046, pad=0.04)
+cbar = plt.colorbar(fraction=0.046, pad=0.02)
 cbar.set_label('Power (dB)')
 plt.show()
 
