@@ -58,8 +58,7 @@ def get_sub_array_data(N_1, N_2, N_3, data_original):
 # Import data
 file = "measurements.mat"
 data = loadmat(file)
-X = data["X_synthetic"] # frequency domain measurements
-x = data["x_synthetic"] # time domain measurements
+X = data["X"] # frequency domain measurements
 r = data["r"] # Get the array sensor possition vector 
 
 # Set parameters for sub array dimensions
@@ -80,14 +79,14 @@ X = X.T
 print('Shape X:', np.shape(X))
 
 # Barlett implementation without delay
-R_xx = (X @ X.conj().T) # / (N1 * N2)
+R_xx = (X @ X.conj().T)
+
 print('Shape Rxx:', np.shape(R_xx))
 
 nbr_steps_tau = 50 
 # Set up search angles and delays for barlett implementation
-theta_search = np.arange(start=0, stop=2*np.pi, step=0.01)
-tau_search = np.linspace(start=1.6667e-7, stop=(1.6667e-7 + 30e-9), num= nbr_steps_tau) 
-
+theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
+tau_search = np.linspace(start=1.6667e-7, stop=(1.6667e-7 + 30e-9), num=nbr_steps_tau) 
 tau_seconds = (np.arange(nbr_steps_tau) / nbr_steps_tau) * 30e-9 
 
 Q = len(tau_search)
@@ -114,6 +113,7 @@ for m in range(M):
 	#print(np.shape(r_array))
 	
 	a = np.exp(1j * ((2 * np.pi) / lamb) * (np.array([np.cos(theta_search[m]), np.sin(theta_search[m])]) @ r_array))
+	
 	#print("Shape a:", np.shape(a))
 
 	for q in range(Q):
@@ -130,9 +130,10 @@ for m in range(M):
 		P_bartlett[m,q] = numerator / denominator
 		# print(np.shape(data))
 
-
-limits = 20 * np.log10(np.amax(abs(P_bartlett))) + np.array([-40,0])
 Power = 20 * np.log10(abs(P_bartlett))
+Power = np.rot90(Power) # needed for heat map
+#limits = 20 * np.log10(np.amax(abs(P_bartlett))) + np.array([-240,0])
+
 
 rows, cols = np.shape(Power)
 
@@ -140,15 +141,14 @@ Power_reduced = np.zeros((rows,cols))
 # replace values lower than 40 db in the spectrum
 for i in range(rows):
 	for j in range(cols):
-		if Power[i,j] < 40:
-			Power_reduced[i,j] = 40
+		if Power[i,j] < -200:
+			Power_reduced[i,j] = -200
 		else:
 			Power_reduced[i,j] = Power[i,j]
 
-
-
+"""
 x = theta_search * (180/np.pi)
-y = tau_seconds
+y = tau_seconds * c # to go to meters
 
 fig = plt.figure()
 fig.tight_layout()
@@ -162,10 +162,26 @@ ax.plot_surface(X.T, Y.T, Power, rstride=1, cstride=1,
 ax.set_xlabel('Angles')
 ax.set_ylabel('Delay (seconds)')
 ax.set_zlabel('Power (db)')
-# ax.set_zlim(limits[0], limits[1])
+#ax.set_zlim(limits[0], limits[1])
 ax.set_title('Bartlett spectrum')
 # fig.colorbar(surf, shrink=0.5, aspect=5)
 
+plt.show()
+
+"""
+
+plt.imshow(Power_reduced, extent=[0, 360, 0, 350e-10], cmap='viridis', interpolation='none', aspect=1e10)
+plt.scatter(50.9, 1.0e-8, s=60, c='red', marker='x', linewidths=1) 
+plt.scatter(34.8, 1.46e-8, s=60, c='red', marker='x', linewidths=1) 
+plt.scatter(63.8, 1.9027e-8, s=60, c='red', marker='x', linewidths=1) 
+plt.scatter(164.8, 3.1118e-8, s=60, c='red', marker='x', linewidths=1) 
+plt.scatter(273.7, 3.1175e-8, s=60, c='red', marker='x', linewidths=1)
+plt.xlabel(r'$\theta_{m}$ (degrees)') 
+plt.ylabel(r'$\tau_{q}$ (seconds)') 
+
+plt.clim(np.amin(Power_reduced), np.amax(Power_reduced)) 
+cbar = plt.colorbar(fraction=0.046, pad=0.02)
+cbar.set_label('Power (dB)')
 plt.show()
 
 
