@@ -161,7 +161,7 @@ f_carrier = 7.5e9 # 7.5 GHz
 c = 300e6 
 lamb = c/f_carrier # should be the same unit as r
 
-nbr_steps_tau = 50
+nbr_steps_tau = 100
 theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
 tau_search = np.linspace(start=1.6667e-7, stop=(1.6667e-7 + 35e-9), num=nbr_steps_tau) 
 
@@ -195,20 +195,8 @@ for m in range(M):
 		P_capon[m,q] = 1 / (u.conj().T @ R_inv @ u)
 
 Power = 20 * np.log10(abs(P_capon))
-# Power = np.rot90(Power) # needed for heat map
+Power = np.rot90(Power) # needed for heat map
 
-"""
-red_power = np.zeros((rows, cols))
-print(np.shape(red_power))
-for i in range(rows):
-	for j in range(cols):
-		if Power[i,j] > 0.00002:
-			red_power[i,j] = 0.00002
-		else:
-			red_power[i,j] = Power[i,j]
-
-print(np.amax(Power))
-print(np.amin(Power))
 """
 x = theta_search * (180/np.pi)
 y = tau_seconds  
@@ -236,9 +224,9 @@ plt.scatter(273.7, 3.1175e-8, s=60, c='red', marker='x', linewidths=1)
 plt.xlabel(r'$\theta_{m}$ (degrees)') 
 plt.ylabel(r'$\tau_{n}$ (seconds)') 
 
-plt.clim(0, 150) 
-cbar = plt.colorbar()
+plt.clim(np.amin(Power), np.amax(Power)) 
+cbar = plt.colorbar(fraction=0.046, pad=0.04)
 cbar.set_label('Power (dB)')
 plt.show()
-"""
+
 
