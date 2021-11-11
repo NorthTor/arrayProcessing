@@ -6,8 +6,15 @@ import matplotlib.pyplot as plt
 from numpy import linalg as LA
 
 
-# get new sub array from master position array 
-# L = N_1 x N_2
+def noise_synthetic(X, SNR):
+    signal_power = 0
+    for i in range(len(X)):
+        signal_power += (np.transpose(X[i]).conj() @ X[i])
+    signal_power /= X.size
+    noise_power = 10 ** (-SNR / 10) * signal_power
+    Noise = np.sqrt(noise_power/2) * (np.random.normal(0, 1, size=(len(X), len(X[0]))) + 1j*np.random.normal(0, 1, size=(len(X), len(X[0]))))
+    X_noise = X + Noise
+    return X_noise
 
 def get_sub_array_position(N_1, N_2, r_original):
 # get new sub array from master position array 
@@ -66,9 +73,13 @@ N1 = 7 # first dimension
 N2 = 7  # second dimension
 N3 = 101 # amount of samples used (max 101)
 
+
 # Get the sub arrays, data and position
 r_array = get_sub_array_position(N1, N2, r)
-X = get_sub_array_data(N1, N2, N3, X)
+X_data = get_sub_array_data(N1, N2, N3, X)
+
+SNR = -10
+X = noise_synthetic(X_data, SNR)
 
 print(np.shape(X))
 # flatten data matrix column wise
@@ -83,11 +94,11 @@ R_xx = (X @ X.conj().T)
 
 print('Shape Rxx:', np.shape(R_xx))
 
-nbr_steps_tau = 50 
+nbr_steps_tau = 100
 # Set up search angles and delays for barlett implementation
-theta_search = np.arange(start=0, stop=2*np.pi, step=0.1)
-tau_search = np.linspace(start=1.6667e-7, stop=(1.6667e-7 + 30e-9), num=nbr_steps_tau) 
-tau_seconds = (np.arange(nbr_steps_tau) / nbr_steps_tau) * 30e-9 
+theta_search = np.arange(start=0, stop=2*np.pi, step=0.01)
+tau_search = np.linspace(start=1.6667e-7, stop=(1.6667e-7 + 35e-9), num=nbr_steps_tau) 
+tau_seconds = (np.arange(nbr_steps_tau) / nbr_steps_tau) * 35e-9 
 
 Q = len(tau_search)
 M = len(theta_search)
@@ -149,25 +160,19 @@ for i in range(rows):
 """
 x = theta_search * (180/np.pi)
 y = tau_seconds * c # to go to meters
-
 fig = plt.figure()
 fig.tight_layout()
 ax = fig.add_subplot(projection='3d')
-
 X,Y = np.meshgrid(x, y)  
-
 ax.plot_surface(X.T, Y.T, Power, rstride=1, cstride=1,
                 cmap='viridis', edgecolor='none') 
-
 ax.set_xlabel('Angles')
 ax.set_ylabel('Delay (seconds)')
 ax.set_zlabel('Power (db)')
 #ax.set_zlim(limits[0], limits[1])
 ax.set_title('Bartlett spectrum')
 # fig.colorbar(surf, shrink=0.5, aspect=5)
-
 plt.show()
-
 """
 
 plt.imshow(Power_reduced, extent=[0, 360, 0, 350e-10], cmap='viridis', interpolation='none', aspect=1e10)
